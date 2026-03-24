@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Happy Graduation!</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f7f7f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden; /* Prevent scrolling on mobile */
+      }
+      canvas {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      @font-face {
+        font-family: "Pixelify Sans";
+        src: url("assets/fonts/PixelifySans-Regular.ttf") format("truetype");
+        font-weight: 400;
+      }
+
+      @font-face {
+        font-family: "Pixelify Sans";
+        src: url("assets/fonts/PixelifySans-Bold.ttf") format("truetype");
+        font-weight: "bold";
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  </head>
+  <body>
+    <div
+      style="
+        font-family: 'Pixelify Sans';
+        position: absolute;
+        visibility: hidden;
+      "
+    >
+      preload
+    </div>
+    <script>
+      const defaultTextStyle = {
+        fontFamily: '"Pixelify Sans"',
+        fontSize: "32px",
+        color: "#333",
+      };
+
+      class Sprite {
+        constructor(name, width, height) {
+          this.name = name;
+          this.width = width;
+          this.height = height;
+        }
+      }
+      // --- 1. BOOT SCENE: Generates simple graphics so we don't need external image files ---
+      class BootScene extends Phaser.Scene {
+        constructor() {
+          super("BootScene");
+        }
+        preload() {
+          this.load.atlas(
+            "player",
+            "assets/kristen_spritesheet.png",
+            "assets/kristen_spritesheet.json"
+          );
+
+          this.load.atlas(
+            "professor",
+            "assets/professor_spritesheet.png",
+            "assets/professor_spritesheet.json"
+          );
+
+          this.load.atlas(
+            "brain",
+            "assets/brain_spritesheet.png",
+            "assets/brain_spritesheet.json"
+          );
+
+          this.load.atlas(
+            "matcha",
+            "assets/matcha_spritesheet.png",
+            "assets/matcha_spritesheet.json"
+          );
+
+          this.load.atlas(
+            "fleabag",
+            "assets/fleabag_spritesheet.png",
+            "assets/fleabag_spritesheet.json"
+          );
+
+          this.load.image("background", "assets/background.png");
+        }
+
+        create() {
+          let graphics = this.make.graphics({ x: 0, y: 0, add: false });
+
+          // // Draw Player (A square with a graduation cap)
+          // graphics.fillStyle(0x333333); // Dark grey body
+          // graphics.fillRect(10, 20, 30, 30);
+          // graphics.fillStyle(0x111111); // Black cap brim
+          // graphics.fillRect(0, 10, 50, 8);
+          // graphics.fillRect(15, 0, 20, 10); // Black cap top
+          // graphics.generateTexture("player", 50, 50);
+
+          // Draw Obstacle (A simple red block/stack of books)
+          graphics.clear();
+
+          // Draw Ground
+          graphics.clear();
+          graphics.fillStyle(0x555555);
+          graphics.fillRect(0, 0, 800, 20);
+          graphics.generateTexture("ground", 800, 20);
+
+          // graphics.clear();
+          // graphics.fillStyle(0x555555);
+          // graphics.fillRect(0, 0, 25, 25);
+          // graphics.generateTexture("matcha", 800, 100);
+
+          this.scene.start("StartScene");
+        }
+      }
+
+      // --- 2. START SCENE: Displays the greeting and waits for input ---
+      class StartScene extends Phaser.Scene {
+        constructor() {
+          super("StartScene");
+        }
+
+        create() {
+          const { width, height } = this.scale;
+          this.bg = this.add
+            .tileSprite(0, 260, width, height, "background")
+            .setScale(3, 3);
+          this.cameras.main.setBackgroundColor("#f7f7f7");
+
+          this.add
+            .text(400, 300, "Tap, Click, or Press Space to Jump", {
+              ...defaultTextStyle,
+
+              fontSize: "24px",
+              fill: "#666",
+            })
+            .setOrigin(0.5);
+          this.add
+            .text(400, 200, "Happy Graduation!", {
+              ...defaultTextStyle,
+              fontSize: "48px",
+              fill: "#333",
+              fontStyle: "bold",
+            })
+            .setOrigin(0.5);
+
+          // Listen for Spacebar, Mouse Click, or Mobile Tap
+          this.input.on("pointerdown", () => this.scene.start("GameScene"));
+          this.input.keyboard.on("keydown-SPACE", () =>
+            this.scene.start("GameScene")
+          );
+        }
+      }
+
+      // --- 3. MAIN GAME SCENE: Handles the jumping, obstacles, and scoring ---
+      class GameScene extends Phaser.Scene {
+        constructor() {
+          super("GameScene");
+        }
+
+        handlePowerupCollision(player, powerup) {
+          switch (powerup.texture.key) {
+            case "matcha":
+              this.score += 50;
+              break;
+            case "fleabag":
+              this.player.invincible = true;
+              this.player.setTint(0x2f8b58); // Turn player green
+
+              // 5 seconds of invincibility
+              this.time.delayedCall(5000, () => {
+                this.player.invincible = false;
+                this.player.clearTint();
+              });
+              break;
+          }
+
+          // Common action: destroy the powerup after collection
+          powerup.destroy();
+        }
+
+        create() {
+          const { width, height } = this.scale;
+          this.bg = this.add
+            .tileSprite(0, 260, width, height, "background")
+            .setScale(3, 3);
+          this.endScore = 1000;
+          this.cameras.main.setBackgroundColor("#f7f7f7");
+
+          // Ground setup
+          this.ground = this.physics.add.staticImage(400, 505, "ground");
+          this.ground.alpha = 0;
+          this.player = this.physics.add.sprite(112, 200, "player");
+
+          // play sprite
+          // Player setup
+          this.anims.create({
+            key: "walking", // This must match exactly
+            frames: this.anims.generateFrameNames("player", {
+              prefix: "sprite",
+              end: 8,
+            }),
+            frameRate: 10,
+            repeat: -1,
+          });
+
+          this.player.anims.play("walking", true);
+          this.player.setGravityY(1800); // Pulls player down fast
+          this.player.setCollideWorldBounds(true);
+          this.physics.add.collider(this.player, this.ground);
+
+          // Obstacles setup
+          this.obstacles = this.physics.add.group();
+
+          // Powerups
+          this.powerups = this.physics.add.group();
+
+          this.physics.add.collider(this.obstacles, this.ground);
+          this.anims.create({
+            key: "walkingProfessor", // This must match exactly
+            frames: this.anims.generateFrameNames("professor", {
+              prefix: "sprite",
+              end: 2,
+            }),
+            frameRate: 10,
+            repeat: -1,
+          });
+
+          this.anims.create({
+            key: "flyingBrain", // This must match exactly
+            frames: this.anims.generateFrameNames("brain", {
+              prefix: "sprite",
+              end: 4,
+            }),
+            frameRate: 5,
+            repeat: -1,
+          });
+
+          this.anims.create({
+            key: "movingMatcha", // This must match exactly
+            frames: this.anims.generateFrameNames("matcha", {
+              prefix: "sprite",
+              end: 4,
+            }),
+            frameRate: 7,
+            repeat: -1,
+          });
+
+          this.anims.create({
+            key: "movingFleabag", // This must match exactly
+            frames: this.anims.generateFrameNames("fleabag", {
+              prefix: "sprite",
+              end: 1,
+            }),
+            frameRate: 1,
+          });
+
+          // If player overlaps with obstacle, trigger game over
+          this.physics.add.overlap(
+            this.player,
+            this.obstacles,
+            this.gameOver,
+            null,
+            this
+          );
+
+          this.physics.add.overlap(
+            this.player,
+            this.powerups,
+            this.handlePowerupCollision,
+            null,
+            this
+          );
+
+          // Input handlers
+          this.input.on("pointerdown", this.jump, this);
+          this.input.keyboard.on("keydown-SPACE", this.jump, this);
+
+          // Game variables
+          this.score = 0;
+          this.scoreText = this.add.text(20, 20, "Score: 0", {
+            ...defaultTextStyle,
+            fontSize: "24px",
+            fill: "#333",
+            fontStyle: "bold",
+          });
+          this.obstacleSpeed = -150;
+
+          // Timer to spawn obstacles or powerups
+          this.spawnTimer = this.time.addEvent({
+            delay: 1500,
+            callback: this.spawn,
+            callbackScope: this,
+            loop: true,
+          });
+        }
+
+        jump() {
+          // Only jump if touching the ground (prevents infinite flying)
+          if (this.player.body.touching.down) {
+            this.player.setVelocityY(-1000);
+          }
+        }
+
+        createObstacle() {
+          // TODO score dependent
+          this.enemyPicker = Phaser.Math.Between(1, 2);
+          let obstacle;
+          switch (this.enemyPicker) {
+            case 1:
+              obstacle = this.obstacles.create(850, 450, "professor");
+
+              obstacle.setVelocityX(this.obstacleSpeed);
+              obstacle.setImmovable(true);
+              obstacle.body.setAllowGravity(false);
+              obstacle.anims.play("walkingProfessor", true);
+              return;
+            default:
+              let y = Phaser.Math.Between(250, 380);
+              obstacle = this.obstacles.create(850, y, "brain");
+
+              obstacle.setVelocityX(this.obstacleSpeed + 2);
+              obstacle.setImmovable(true);
+              obstacle.body.setAllowGravity(false);
+              obstacle.anims.play("flyingBrain", true);
+              return;
+          }
+        }
+
+        spawn() {
+          // Randomize the time between obstacles so it's not perfectly predictable
+          this.spawnTimer.delay = Phaser.Math.Between(2000, 2500);
+          let randomSpawnPicker = Phaser.Math.Between(0, 10);
+
+          // 1 in 10 chance to spawn a powerup
+          switch (randomSpawnPicker) {
+            case 1:
+              return this.createPowerup();
+            default:
+              return this.createObstacle();
+          }
+        }
+
+        createPowerup() {
+          this.powerUpPicker = Phaser.Math.Between(0, 3);
+          let powerup;
+          switch (this.powerupPicker) {
+            case 1:
+            default:
+              powerup = this.powerups.create(1250, 200, "fleabag");
+              powerup.setVelocityX(this.obstacleSpeed + 2);
+              powerup.setImmovable(true);
+              powerup.body.setAllowGravity(false);
+              powerup.anims.play("movingFleabag", true);
+
+              return;
+            // default:
+            //   let y = Phaser.Math.Between(250, 400);
+            //   powerup = this.powerups.create(1250, y, "matcha");
+
+            //   powerup.setVelocityX(this.obstacleSpeed + 2);
+            //   powerup.setImmovable(true);
+            //   powerup.body.setAllowGravity(false);
+            //   powerup.anims.play("movingMatcha", true);
+
+            //   return;
+          }
+        }
+
+        update() {
+          this.bg.tilePositionX += 5;
+          // Increase score
+          this.score += 0.2;
+          let score = Math.floor(this.score);
+          this.scoreText.setText("Score: " + score);
+
+          if (score > this.endScore) {
+            this.scene.start("GameWinScene", {
+              score: Math.floor(this.score),
+            });
+            return;
+          }
+
+          // Increase speed slightly over time to make it harder
+          this.obstacleSpeed -= 0.1;
+
+          // Clean up obstacles that go off screen to save memory
+          this.obstacles.getChildren().forEach((obstacle) => {
+            if (obstacle.x < -50) {
+              obstacle.destroy();
+            }
+          });
+
+          // Clean up obstacles that go off screen to save memory
+          this.powerups.getChildren().forEach((powerup) => {
+            if (powerup.x < -50) {
+              powerup.destroy();
+            }
+          });
+        }
+
+        gameOver() {
+          if (!this.player.invincible) {
+            this.physics.pause();
+            this.player.setTint(0xff0000); // Turn player red
+            this.time.removeAllEvents(); // Stop spawning obstacles
+
+            // Go to Game Over scene after a tiny delay
+            this.time.delayedCall(500, () => {
+              this.scene.start("GameOverScene", {
+                score: Math.floor(this.score),
+              });
+            });
+          }
+        }
+
+        gameWin() {
+          this.physics.pause();
+          this.player.setTint(0xff0000); // Turn player red
+
+          this.time.removeAllEvents(); // Stop spawning obstacles
+
+          // Go to Game Win scene after a tiny delay
+          this.time.delayedCall(500, () => {
+            this.scene.start("GameWinScene", {
+              score: Math.floor(this.score),
+            });
+          });
+        }
+      }
+
+      // --- 4. GAME OVER SCENE ---
+      class GameOverScene extends Phaser.Scene {
+        constructor() {
+          super("GameOverScene");
+        }
+
+        init(data) {
+          this.finalScore = data.score;
+        }
+
+        create() {
+          this.cameras.main.setBackgroundColor("#f7f7f7");
+          this.add
+            .text(400, 200, "You didn't graduate!", {
+              ...defaultTextStyle,
+
+              fontSize: "48px",
+              fill: "#d9534f",
+              fontStyle: "bold",
+            })
+            .setOrigin(0.5);
+          this.add
+            .text(400, 260, "Final Score: " + this.finalScore, {
+              ...defaultTextStyle,
+
+              fontSize: "32px",
+              fill: "#333",
+            })
+            .setOrigin(0.5);
+
+          this.add
+            .text(400, 340, "You must reach 1000 points to graduate.", {
+              ...defaultTextStyle,
+              fontSize: "20px",
+              fill: "#666",
+            })
+            .setOrigin(0.5);
+          this.add
+            .text(400, 400, "Tap, Click, or Press Space to Restart", {
+              ...defaultTextStyle,
+              fontSize: "20px",
+              fill: "#666",
+            })
+            .setOrigin(0.5);
+
+          // Wait a moment before allowing restart so they don't accidentally click it immediately
+          this.time.delayedCall(300, () => {
+            this.input.on("pointerdown", () => this.scene.start("GameScene"));
+            this.input.keyboard.on("keydown-SPACE", () =>
+              this.scene.start("GameScene")
+            );
+          });
+        }
+      }
+
+      // --- 4. GAME WIN SCENE ---
+      class GameWinScene extends Phaser.Scene {
+        constructor() {
+          super("GameWinScene");
+        }
+
+        init(data) {
+          this.finalScore = data.score;
+        }
+
+        create() {
+          this.cameras.main.setBackgroundColor("#f7f7f7");
+          this.add
+            .text(400, 200, "You graduated!", {
+              ...defaultTextStyle,
+              fontSize: "48px",
+              fill: "green",
+              fontStyle: "bold",
+            })
+            .setOrigin(0.5);
+          this.add
+            .text(400, 260, "Final Score: " + this.finalScore, {
+              ...defaultTextStyle,
+
+              fontSize: "32px",
+              fill: "#333",
+            })
+            .setOrigin(0.5);
+
+          this.add
+            .text(400, 340, "Congratulations on finishing your degree!", {
+              ...defaultTextStyle,
+
+              fontSize: "20px",
+              fill: "#666",
+            })
+            .setOrigin(0.5);
+          this.add
+            .text(400, 400, "Tap, Click, or Press Space to Play Again", {
+              ...defaultTextStyle,
+
+              fontSize: "20px",
+              fill: "#666",
+            })
+            .setOrigin(0.5);
+
+          // Wait a moment before allowing restart so they don't accidentally click it immediately
+          this.time.delayedCall(300, () => {
+            this.input.on("pointerdown", () => this.scene.start("GameScene"));
+            this.input.keyboard.on("keydown-SPACE", () =>
+              this.scene.start("GameScene")
+            );
+          });
+        }
+      }
+      // --- GAME CONFIGURATION ---
+      const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        backgroundColor: "#f7f7f7",
+        scale: {
+          mode: Phaser.Scale.FIT, // Scales game to fit browser window/mobile screen
+          autoCenter: Phaser.Scale.CENTER_BOTH, // Centers the game on the screen
+        },
+        physics: {
+          default: "arcade",
+          arcade: {
+            gravity: { y: 0 },
+            debug: false,
+          },
+        },
+        scene: [BootScene, StartScene, GameScene, GameOverScene, GameWinScene],
+      };
+
+      setTimeout(() => {
+        new Phaser.Game(config);
+      }, 100);
+    </script>
+  </body>
+</html>
