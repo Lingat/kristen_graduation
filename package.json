@@ -1,0 +1,24 @@
+{
+  "name": "kristen_graduation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lingat/kristen_graduation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Lingat/kristen_graduation/issues"
+  },
+  "homepage": "https://github.com/Lingat/kristen_graduation#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
