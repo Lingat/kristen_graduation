@@ -1,0 +1,67 @@
+{
+  "frames": [
+    {
+      "filename": "sprite1",
+      "frame": { "x": 136, "y": 50, "w": 48, "h": 40 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 40 },
+      "sourceSize": { "w": 48, "h": 40 }
+    },
+    {
+      "filename": "sprite2",
+      "frame": { "x": 232, "y": 52, "w": 48, "h": 38 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 38 },
+      "sourceSize": { "w": 48, "h": 38 }
+    },
+    {
+      "filename": "sprite3",
+      "frame": { "x": 40, "y": 60, "w": 48, "h": 30 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 30 },
+      "sourceSize": { "w": 48, "h": 30 }
+    },
+    {
+      "filename": "sprite4",
+      "frame": { "x": 38, "y": 140, "w": 48, "h": 40 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 40 },
+      "sourceSize": { "w": 48, "h": 40 }
+    },
+    {
+      "filename": "sprite5",
+      "frame": { "x": 132, "y": 140, "w": 48, "h": 38 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 38 },
+      "sourceSize": { "w": 48, "h": 38 }
+    },
+    {
+      "filename": "sprite6",
+      "frame": { "x": 226, "y": 144, "w": 48, "h": 38 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 38 },
+      "sourceSize": { "w": 48, "h": 38 }
+    },
+    {
+      "filename": "sprite7",
+      "frame": { "x": 32, "y": 248, "w": 48, "h": 34 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 34 },
+      "sourceSize": { "w": 48, "h": 34 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.leshylabs.com/apps/sstool/",
+    "version": "Leshy SpriteSheet Tool v0.9.1",
+    "image": "spritesheet.png",
+    "size": { "w": 288, "h": 288 },
+    "scale": 1
+  }
+}

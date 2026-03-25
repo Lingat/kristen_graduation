@@ -37,9 +37,21 @@ class BootScene extends Phaser.Scene {
     );
 
     this.load.atlas(
+      "exman",
+      "assets/exman_spritesheet.png",
+      "assets/exman_spritesheet.json"
+    );
+
+    this.load.atlas(
       "brain",
       "assets/brain_spritesheet.png",
       "assets/brain_spritesheet.json"
+    );
+
+    this.load.atlas(
+      "naptime",
+      "assets/naptime_spritesheet.png",
+      "assets/naptime_spritesheet.json"
     );
 
     this.load.atlas(
@@ -94,17 +106,6 @@ class TutorialScene extends Phaser.Scene {
     super("TutorialScene");
   }
 
-  preload() {
-    // Placeholder loads - replace with your actual paths
-    this.load.image("player", "assets/player.png");
-    this.load.image("professor", "assets/professor.png");
-    this.load.image("brain", "assets/brain.png");
-    this.load.image("enemy3", "assets/enemy3.png");
-    this.load.image("enemy4", "assets/enemy4.png");
-    this.load.image("matcha", "assets/matcha.png");
-    this.load.image("fleabag", "assets/fleabag.png");
-  }
-
   create() {
     const centerX = 240;
     const centerY = 50;
@@ -116,24 +117,24 @@ class TutorialScene extends Phaser.Scene {
         sprite: "player",
       },
       {
-        text: "However, there are some obstacles\nin your way...",
+        text: "However, you have some ops...",
         sprite: null,
       },
       {
-        text: "The Professor: Avoid them at all costs,\nor they will fail you!",
+        text: "The Professor: Avoid them at all costs,\nor they will fail you.",
         sprite: "professor",
       },
       {
-        text: "The Flying Brain: Doubt and fear.\nDon't jump too high!",
+        text: "The Flying Brain: Personal doubt and fear.\n(Don't jump too high!)",
         sprite: "brain",
       },
       {
-        text: "The Procrastination Monster:\nHe slows you down!",
-        sprite: "enemy3",
+        text: "The Naptime Monster:\nNot a game-ender but will set you back! (-100 points)",
+        sprite: "naptime",
       },
       {
-        text: "The Coffee Shortage:\nWatch your energy levels!",
-        sprite: "enemy4",
+        text: "That Weird Ex:\n UH OH",
+        sprite: "exman",
       },
       {
         text: "Luckily, there are some power-ups\nto help you out!",
@@ -141,7 +142,7 @@ class TutorialScene extends Phaser.Scene {
       },
       { text: "Matcha! Drink this to score +50 points.", sprite: "matcha" },
       {
-        text: "Fleabag! Gain 5-second invincibility\nagainst the baddies.",
+        text: "Your favourite show! Gain 5-second invincibility\nagainst the baddies.",
         sprite: "fleabag",
       },
       {
@@ -167,7 +168,7 @@ class TutorialScene extends Phaser.Scene {
       .setScale(2);
 
     this.add
-      .text(centerX, 300, "Tap to continue...", {
+      .text(centerX, 300, "Tap or press space to continue...", {
         fontSize: "12px",
         fill: "#aaa",
       })
@@ -175,6 +176,7 @@ class TutorialScene extends Phaser.Scene {
 
     // Input listener
     this.input.on("pointerdown", () => this.nextStep());
+    this.input.on("keydown-SPACE", () => this.nextStep());
 
     // Show the first step
     this.updateStep();
@@ -221,10 +223,10 @@ class StartScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
     this.add
-      .text(240, 200, "Tap, Click, or Press Space to Jump", {
+      .text(240, 200, "Tap, Click, or Press Space", {
         ...defaultTextStyle,
-        fontSize: "16px",
-        fill: "#666",
+        fontSize: "20px",
+        fill: "white",
       })
       .setOrigin(0.5, 0.5);
     // Listen for Spacebar, Mouse Click, or Mobile Tap
@@ -308,12 +310,32 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: "walkingExman", // This must match exactly
+      frames: this.anims.generateFrameNames("exman", {
+        prefix: "sprite",
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    this.anims.create({
       key: "flyingBrain", // This must match exactly
       frames: this.anims.generateFrameNames("brain", {
         prefix: "sprite",
         end: 4,
       }),
       frameRate: 5,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "walkingNaptime", // This must match exactly
+      frames: this.anims.generateFrameNames("naptime", {
+        prefix: "sprite",
+        end: 7,
+      }),
+      frameRate: 7,
       repeat: -1,
     });
 
@@ -384,7 +406,7 @@ class GameScene extends Phaser.Scene {
 
   createObstacle() {
     // TODO score dependent
-    this.enemyPicker = Phaser.Math.Between(1, 2);
+    this.enemyPicker = Phaser.Math.Between(1, 4);
     let obstacle;
     switch (this.enemyPicker) {
       case 1:
@@ -394,6 +416,23 @@ class GameScene extends Phaser.Scene {
         obstacle.setImmovable(true);
         obstacle.body.setAllowGravity(false);
         obstacle.anims.play("walkingProfessor", true);
+        return;
+      case 2:
+        obstacle = this.obstacles.create(this.enemySpawnX, 290, "naptime");
+
+        obstacle.setVelocityX(this.obstacleSpeed);
+        obstacle.setImmovable(true);
+        obstacle.body.setAllowGravity(false);
+        obstacle.anims.play("walkingNaptime", true);
+        return;
+
+      case 3:
+        obstacle = this.obstacles.create(this.enemySpawnX, 280, "exman");
+
+        obstacle.setVelocityX(this.obstacleSpeed);
+        obstacle.setImmovable(true);
+        obstacle.body.setAllowGravity(false);
+        obstacle.anims.play("walkingExman", true);
         return;
       default:
         let y = Phaser.Math.Between(10, 90);
