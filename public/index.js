@@ -30,10 +30,6 @@ const playMusic = (context, soundName, isLoop = true) => {
   }
 };
 
-const playEffect = (context, soundName) => {
-  // register sound first
-  context[soundName].play();
-};
 // --- 1. BOOT SCENE: Generates simple graphics so we don't need external image files ---
 class BootScene extends Phaser.Scene {
   constructor() {
@@ -96,6 +92,10 @@ class BootScene extends Phaser.Scene {
 
     // Audio effects
     this.load.audio("jump", ["assets/audio/jump.mp3"]);
+    this.load.audio("noo", ["assets/audio/noo.ogg"]);
+    this.load.audio("matchaSay", ["assets/audio/matchaSay.ogg"]);
+    this.load.audio("yippee", ["assets/audio/yippee.ogg"]);
+    this.load.audio("hehe", ["assets/audio/hehe.ogg"]);
   }
 
   create() {
@@ -262,6 +262,8 @@ class GameScene extends Phaser.Scene {
   handlePowerupCollision(player, powerup) {
     switch (powerup.texture.key) {
       case "matcha":
+        this.matchaSaySound.play();
+
         this.player.setBlendMode(Phaser.BlendModes.COLOR);
 
         this.score += 50;
@@ -271,6 +273,7 @@ class GameScene extends Phaser.Scene {
         });
         break;
       case "fleabag":
+        this.heheSound.play();
         this.player.invincible = true;
         this.player.setBlendMode(Phaser.BlendModes.MULTIPLY);
 
@@ -290,10 +293,15 @@ class GameScene extends Phaser.Scene {
     createBackground(this);
     playMusic(this, "game");
     this.jumpSound = this.sound.add("jump");
+    this.yippeeSound = this.sound.add("yippee");
+    this.matchaSaySound = this.sound.add("matchaSay");
+    this.nooSound = this.sound.add("noo");
+    this.heheSound = this.sound.add("hehe");
+
     // this.jumpSound.setLoop(false);
 
     this.enemySpawnX = 750;
-    this.endScore = 1000;
+    this.endScore = 200;
     this.cameras.main.setBackgroundColor("#f7f7f7");
 
     // Ground setup
@@ -522,6 +530,8 @@ class GameScene extends Phaser.Scene {
 
     if (score > this.endScore) {
       this.music.stop();
+      this.yippeeSound.play();
+
       this.scene.start("GameWinScene", {
         score: Math.floor(this.score),
       });
@@ -548,6 +558,7 @@ class GameScene extends Phaser.Scene {
 
   gameOver() {
     if (!this.player.invincible) {
+      this.nooSound.play();
       this.physics.pause();
       this.player.setTint(0xff0000); // Turn player red
       this.time.removeAllEvents(); // Stop spawning obstacles
