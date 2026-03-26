@@ -262,16 +262,22 @@ class GameScene extends Phaser.Scene {
   handlePowerupCollision(player, powerup) {
     switch (powerup.texture.key) {
       case "matcha":
+        this.player.setBlendMode(Phaser.BlendModes.COLOR);
+
         this.score += 50;
+
+        this.time.delayedCall(500, () => {
+          this.player.setBlendMode(Phaser.BlendModes.NORMAL);
+        });
         break;
       case "fleabag":
         this.player.invincible = true;
-        this.player.setTint(0x2f8b58); // Turn player green
+        this.player.setBlendMode(Phaser.BlendModes.MULTIPLY);
 
         // 5 seconds of invincibility
         this.time.delayedCall(5000, () => {
           this.player.invincible = false;
-          this.player.clearTint();
+          this.player.setBlendMode(Phaser.BlendModes.NORMAL);
         });
         break;
     }
@@ -482,10 +488,9 @@ class GameScene extends Phaser.Scene {
   }
 
   createPowerup() {
-    this.powerUpPicker = Phaser.Math.Between(0, 3);
     let powerup;
     let y;
-    switch (this.powerupPicker) {
+    switch (Phaser.Math.Between(0, 2)) {
       case 1:
         y = Phaser.Math.Between(100, 200);
         powerup = this.powerups.create(this.enemySpawnX, y, "fleabag");
@@ -730,10 +735,14 @@ class GameWinScene extends Phaser.Scene {
 
     // Wait a moment before allowing restart so they don't accidentally click it immediately
     this.time.delayedCall(300, () => {
-      this.input.on("pointerdown", () => this.scene.start("GameScene"));
-      this.input.keyboard.on("keydown-SPACE", () =>
-        this.scene.start("GameScene")
-      );
+      this.input.on("pointerdown", () => {
+        this.music.stop();
+        this.scene.start("GameScene");
+      });
+      this.input.keyboard.on("keydown-SPACE", () => {
+        this.music.stop();
+        this.scene.start("GameScene");
+      });
     });
   }
 }
