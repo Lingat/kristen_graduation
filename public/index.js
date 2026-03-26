@@ -156,7 +156,7 @@ class TutorialScene extends Phaser.Scene {
       },
       { text: "Matcha! Drink this to score +50 points.", sprite: "matcha" },
       {
-        text: "Your favourite show! Gain 5-second invincibility\nagainst the baddies.",
+        text: "Your favourite show! Gain 6-second invincibility\nagainst the baddies.",
         sprite: "fleabag",
       },
       {
@@ -276,11 +276,13 @@ class GameScene extends Phaser.Scene {
         this.heheSound.play();
         this.player.invincible = true;
         this.player.setBlendMode(Phaser.BlendModes.MULTIPLY);
+        this.player.setAlpha(0.4);
 
-        // 5 seconds of invincibility
-        this.time.delayedCall(5000, () => {
+        // 6 seconds of invincibility
+        this.time.delayedCall(6000, () => {
           this.player.invincible = false;
           this.player.setBlendMode(Phaser.BlendModes.NORMAL);
+          this.player.setAlpha(1);
         });
         break;
     }
@@ -301,7 +303,7 @@ class GameScene extends Phaser.Scene {
     // this.jumpSound.setLoop(false);
 
     this.enemySpawnX = 750;
-    this.endScore = 200;
+    this.endScore = 1000;
     this.cameras.main.setBackgroundColor("#f7f7f7");
 
     // Ground setup
@@ -420,7 +422,7 @@ class GameScene extends Phaser.Scene {
       fontSize: "24px",
       fill: "black",
     });
-    this.obstacleSpeed = -150;
+    this.obstacleSpeed = -170;
 
     // Timer to spawn obstacles or powerups
     this.spawnTimer = this.time.addEvent({
@@ -434,7 +436,7 @@ class GameScene extends Phaser.Scene {
   jump() {
     // Only jump if touching the ground (prevents infinite flying)
     if (this.player.body.touching.down) {
-      this.player.setVelocityY(-1000);
+      this.player.setVelocityY(-800);
       this.jumpSound.play();
     }
   }
@@ -631,19 +633,19 @@ class GameOverScene extends Phaser.Scene {
         "You must reach 1000 points to graduate.",
         {
           ...defaultTextStyle,
-          fontSize: "15px",
+          fontSize: "18px",
           fill: "#666",
         }
       )
       .setOrigin(0.5);
 
     this.replayButton = this.add.text(
-      240,
+      260,
       gameOverTextY + spacingTextY * 3,
       "Replay Game",
       {
         ...defaultTextStyle,
-        fontSize: "15px",
+        fontSize: "18px",
         color: "#ffffff",
         backgroundColor: "green",
         padding: { x: 14, y: 5 },
@@ -651,12 +653,12 @@ class GameOverScene extends Phaser.Scene {
     );
 
     this.goHomeButton = this.add.text(
-      100,
+      80,
       gameOverTextY + spacingTextY * 3,
       "Return Home",
       {
         ...defaultTextStyle,
-        fontSize: "15px",
+        fontSize: "18px",
         color: "#ffffff",
         backgroundColor: "red",
         padding: { x: 14, y: 5 },
