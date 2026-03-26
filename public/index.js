@@ -18,70 +18,88 @@ const createBackground = (context) => {
     .tileSprite(0, 160, 1440, 320, "graduation_background")
     .setScale(1, 1);
 };
+
+const playMusic = (context, soundName, isLoop = true) => {
+  if (!context.music) {
+    context.music = context.sound.add(soundName);
+    context.music.play();
+    // Optional: Loop the music
+    context.music.setLoop(isLoop);
+  } else {
+    context.music.play();
+  }
+};
+
+const playEffect = (context, soundName) => {
+  // register sound first
+  context[soundName].play();
+};
 // --- 1. BOOT SCENE: Generates simple graphics so we don't need external image files ---
 class BootScene extends Phaser.Scene {
   constructor() {
     super("BootScene");
   }
   preload() {
+    // Sprites
     this.load.atlas(
       "player",
-      "assets/kristen_spritesheet.png",
-      "assets/kristen_spritesheet.json"
+      "assets/sprites/kristen_spritesheet.png",
+      "assets/sprites/kristen_spritesheet.json"
     );
 
     this.load.atlas(
       "professor",
-      "assets/professor_spritesheet.png",
-      "assets/professor_spritesheet.json"
+      "assets/sprites/professor_spritesheet.png",
+      "assets/sprites/professor_spritesheet.json"
     );
 
     this.load.atlas(
       "exman",
-      "assets/exman_spritesheet.png",
-      "assets/exman_spritesheet.json"
+      "assets/sprites/exman_spritesheet.png",
+      "assets/sprites/exman_spritesheet.json"
     );
 
     this.load.atlas(
       "brain",
-      "assets/brain_spritesheet.png",
-      "assets/brain_spritesheet.json"
+      "assets/sprites/brain_spritesheet.png",
+      "assets/sprites/brain_spritesheet.json"
     );
 
     this.load.atlas(
       "naptime",
-      "assets/naptime_spritesheet.png",
-      "assets/naptime_spritesheet.json"
+      "assets/sprites/naptime_spritesheet.png",
+      "assets/sprites/naptime_spritesheet.json"
     );
 
     this.load.atlas(
       "matcha",
-      "assets/matcha_spritesheet.png",
-      "assets/matcha_spritesheet.json"
+      "assets/sprites/matcha_spritesheet.png",
+      "assets/sprites/matcha_spritesheet.json"
     );
 
     this.load.atlas(
       "fleabag",
-      "assets/fleabag_spritesheet.png",
-      "assets/fleabag_spritesheet.json"
+      "assets/sprites/fleabag_spritesheet.png",
+      "assets/sprites/fleabag_spritesheet.json"
     );
 
+    // BG
     this.load.image(
       "graduation_background",
-      "assets/graduation_background.png"
+      "assets/sprites/graduation_background.png"
     );
+
+    // Audio
+    this.load.audio("theme", ["assets/audio/theme.mp3"]);
+    this.load.audio("game", ["assets/audio/game.mp3"]);
+    this.load.audio("win", ["assets/audio/win.mp3"]);
+
+    // Audio effects
+    this.load.audio("jump", ["assets/audio/jump.mp3"]);
   }
 
   create() {
     let graphics = this.make.graphics({ x: 0, y: 0, add: false });
-
-    // // Draw Player (A square with a graduation cap)
-    // graphics.fillStyle(0x333333); // Dark grey body
-    // graphics.fillRect(10, 20, 30, 30);
-    // graphics.fillStyle(0x111111); // Black cap brim
-    // graphics.fillRect(0, 10, 50, 8);
-    // graphics.fillRect(15, 0, 20, 10); // Black cap top
-    // graphics.generateTexture("player", 50, 50);
 
     // Draw Obstacle (A simple red block/stack of books)
     graphics.clear();
@@ -91,11 +109,6 @@ class BootScene extends Phaser.Scene {
     graphics.fillStyle(0x555555);
     graphics.fillRect(0, 0, 800, 20);
     graphics.generateTexture("ground", 800, 20);
-
-    // graphics.clear();
-    // graphics.fillStyle(0x555555);
-    // graphics.fillRect(0, 0, 25, 25);
-    // graphics.generateTexture("matcha", 800, 100);
 
     this.scene.start("StartScene");
   }
@@ -109,6 +122,7 @@ class TutorialScene extends Phaser.Scene {
   create() {
     const centerX = 240;
     const centerY = 50;
+    playMusic(this, "theme");
 
     // Use a list to manage your tutorial steps
     this.tutorialSteps = [
@@ -129,7 +143,7 @@ class TutorialScene extends Phaser.Scene {
         sprite: "brain",
       },
       {
-        text: "The Naptime Monster:\nNot a game-ender but will set you back! (-100 points)",
+        text: "The Naptime Sheep:\nWe know you love napping.",
         sprite: "naptime",
       },
       {
@@ -199,6 +213,7 @@ class TutorialScene extends Phaser.Scene {
     if (this.currentStep < this.tutorialSteps.length) {
       this.updateStep();
     } else {
+      this.music.stop(); // stop music
       this.scene.start("GameScene"); // Transition to your actual game
     }
   }
@@ -212,6 +227,7 @@ class StartScene extends Phaser.Scene {
 
   create() {
     createBackground(this);
+
     this.cameras.main.setBackgroundColor("#f7f7f7");
 
     this.add
@@ -266,6 +282,10 @@ class GameScene extends Phaser.Scene {
 
   create() {
     createBackground(this);
+    playMusic(this, "game");
+    this.jumpSound = this.sound.add("jump");
+    // this.jumpSound.setLoop(false);
+
     this.enemySpawnX = 750;
     this.endScore = 1000;
     this.cameras.main.setBackgroundColor("#f7f7f7");
@@ -401,6 +421,7 @@ class GameScene extends Phaser.Scene {
     // Only jump if touching the ground (prevents infinite flying)
     if (this.player.body.touching.down) {
       this.player.setVelocityY(-1000);
+      this.jumpSound.play();
     }
   }
 
@@ -495,6 +516,7 @@ class GameScene extends Phaser.Scene {
     this.scoreText.setText("Score: " + score);
 
     if (score > this.endScore) {
+      this.music.stop();
       this.scene.start("GameWinScene", {
         score: Math.floor(this.score),
       });
@@ -527,6 +549,8 @@ class GameScene extends Phaser.Scene {
 
       // Go to Game Over scene after a tiny delay
       this.time.delayedCall(500, () => {
+        this.music.stop();
+
         this.scene.start("GameOverScene", {
           score: Math.floor(this.score),
         });
@@ -630,6 +654,8 @@ class GameWinScene extends Phaser.Scene {
   }
 
   create() {
+    playMusic(this, "win");
+
     const gameWinTextX = 240;
     const gameWinTextY = 100;
     const spacingTextY = 40;
