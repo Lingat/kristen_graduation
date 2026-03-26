@@ -620,25 +620,44 @@ class GameOverScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5);
-    this.add
-      .text(
-        240,
-        gameOverTextY + spacingTextY * 3,
-        "Tap, Click, or Press Space to Restart",
-        {
-          ...defaultTextStyle,
-          fontSize: "15px",
-          fill: "#666",
-        }
-      )
-      .setOrigin(0.5);
+
+    this.replayButton = this.add.text(
+      240,
+      gameOverTextY + spacingTextY * 3,
+      "Replay Game",
+      {
+        ...defaultTextStyle,
+        fontSize: "15px",
+        color: "#ffffff",
+        backgroundColor: "green",
+        padding: { x: 14, y: 5 },
+      }
+    );
+
+    this.goHomeButton = this.add.text(
+      100,
+      gameOverTextY + spacingTextY * 3,
+      "Return Home",
+      {
+        ...defaultTextStyle,
+        fontSize: "15px",
+        color: "#ffffff",
+        backgroundColor: "red",
+        padding: { x: 14, y: 5 },
+      }
+    );
+    this.goHomeButton.setInteractive({ useHandCrsor: true });
+    this.replayButton.setInteractive({ useHandCrsor: true });
 
     // Wait a moment before allowing restart so they don't accidentally click it immediately
     this.time.delayedCall(300, () => {
-      this.input.on("pointerdown", () => this.scene.start("GameScene"));
-      this.input.keyboard.on("keydown-SPACE", () =>
-        this.scene.start("GameScene")
-      );
+      this.replayButton.on("pointerdown", () => {
+        this.scene.start("GameScene");
+      });
+
+      this.goHomeButton.on("pointerdown", () => {
+        this.scene.start("BootScene");
+      });
     });
   }
 }
