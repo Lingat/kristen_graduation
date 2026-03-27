@@ -21,10 +21,12 @@ const createBackground = (context) => {
 
 const playMusic = (context, soundName, isLoop = true) => {
   if (!context.music) {
-    context.music = context.sound.add(soundName);
-    context.music.play();
-    // Optional: Loop the music
-    context.music.setLoop(isLoop);
+    try {
+      context.music = context.sound.add(soundName);
+      context.music.play();
+      // Optional: Loop the music
+      context.music.setLoop(isLoop);
+    } catch (err) {}
   } else {
     context.music.play();
   }
@@ -160,7 +162,7 @@ class TutorialScene extends Phaser.Scene {
         sprite: "fleabag",
       },
       {
-        text: "Jump and avoid enemies to graduate.\nGood luck!",
+        text: "Tap the screen to jump and avoid enemies to graduate.\nGood luck!",
         sprite: "player",
       },
     ];
@@ -170,7 +172,7 @@ class TutorialScene extends Phaser.Scene {
     // Create UI elements
     this.instructionText = this.add
       .text(centerX, centerY, "", {
-        fontSize: "16px",
+        fontSize: "18px",
         fill: "#000",
         align: "center",
         wordWrap: { width: 400 },
@@ -182,8 +184,8 @@ class TutorialScene extends Phaser.Scene {
       .setScale(2);
 
     this.add
-      .text(centerX, 300, "Tap or press space to continue...", {
-        fontSize: "12px",
+      .text(centerX, 300, "Tap to continue...", {
+        fontSize: "18px",
         fill: "#aaa",
       })
       .setOrigin(0.5);
@@ -226,7 +228,9 @@ class StartScene extends Phaser.Scene {
   }
 
   create() {
-    createBackground(this);
+    this.bg = this.add
+      .tileSprite(680, 160, 1440, 320, "graduation_background")
+      .setScale(1, 1);
 
     this.cameras.main.setBackgroundColor("#f7f7f7");
 
@@ -239,9 +243,9 @@ class StartScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
     this.add
-      .text(240, 200, "Tap, Click, or Press Space", {
+      .text(240, 200, "Tap the screen!", {
         ...defaultTextStyle,
-        fontSize: "20px",
+        fontSize: "28px",
         fill: "white",
       })
       .setOrigin(0.5, 0.5);
@@ -689,13 +693,19 @@ class GameWinScene extends Phaser.Scene {
   init(data) {
     this.finalScore = data.score;
   }
-
+  preload() {
+    this.load.atlas(
+      "celebration",
+      "assets/sprites/graduation_celebration_spritesheet.png",
+      "assets/sprites/graduation_celebration_spritesheet.json"
+    );
+  }
   create() {
     playMusic(this, "win");
 
     const gameWinTextX = 240;
-    const gameWinTextY = 100;
-    const spacingTextY = 40;
+    const gameWinTextY = 50;
+    const spacingTextY = 30;
     this.cameras.main.setBackgroundColor("#f7f7f7");
     this.add
       .text(gameWinTextX, gameWinTextY, "You graduated!", {
@@ -736,7 +746,7 @@ class GameWinScene extends Phaser.Scene {
       .text(
         gameWinTextX,
         gameWinTextY + spacingTextY * 3,
-        "Tap, Click, or Press Space to Play Again",
+        "Tap to Play Again",
         {
           ...defaultTextStyle,
 
@@ -745,6 +755,21 @@ class GameWinScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5, 0.5);
+    this.displaySprite = this.add
+      .sprite(gameWinTextX - 5, 235, "celebration")
+      .setScale(2);
+
+    this.anims.create({
+      key: "celebrate", // This must match exactly
+      frames: this.anims.generateFrameNames("celebration", {
+        prefix: "sprite",
+        end: 2,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    this.displaySprite.anims.play("celebrate", true);
 
     // Wait a moment before allowing restart so they don't accidentally click it immediately
     this.time.delayedCall(300, () => {
@@ -783,8 +808,8 @@ const config = {
     StartScene,
     TutorialScene,
     GameScene,
-    GameWinScene,
     GameOverScene,
+    GameWinScene,
   ],
 };
 
