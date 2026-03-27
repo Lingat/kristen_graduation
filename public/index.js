@@ -453,7 +453,7 @@ class GameScene extends Phaser.Scene {
       case 1:
         obstacle = this.obstacles.create(this.enemySpawnX, 270, "professor");
 
-        obstacle.setVelocityX(this.obstacleSpeed);
+        obstacle.setVelocityX(this.obstacleSpeed + 20);
         obstacle.setImmovable(true);
         obstacle.body.setAllowGravity(false);
         obstacle.anims.play("walkingProfessor", true);
@@ -476,7 +476,7 @@ class GameScene extends Phaser.Scene {
         obstacle.anims.play("walkingExman", true);
         return;
       default:
-        let y = Phaser.Math.Between(10, 90);
+        let y = Phaser.Math.Between(50, 90);
         obstacle = this.obstacles.create(this.enemySpawnX, y, "brain");
 
         obstacle.setVelocityX(this.obstacleSpeed + 2);
