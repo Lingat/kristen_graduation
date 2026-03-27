@@ -156,7 +156,7 @@ class TutorialScene extends Phaser.Scene {
         text: "Luckily, there are some power-ups\nto help you out!",
         sprite: null,
       },
-      { text: "Matcha! Drink this to score +50 points.", sprite: "matcha" },
+      { text: "Matcha! Drink this to score +100 points.", sprite: "matcha" },
       {
         text: "Your favourite show! Gain 6-second invincibility\nagainst the baddies.",
         sprite: "fleabag",
@@ -270,7 +270,7 @@ class GameScene extends Phaser.Scene {
 
         this.player.setBlendMode(Phaser.BlendModes.COLOR);
 
-        this.score += 50;
+        this.score += 100;
 
         this.time.delayedCall(500, () => {
           this.player.setBlendMode(Phaser.BlendModes.NORMAL);
@@ -328,7 +328,8 @@ class GameScene extends Phaser.Scene {
     });
 
     this.player.anims.play("walking", true);
-    this.player.setGravityY(1800); // Pulls player down fast
+    this.player.setGravityY(900); // Pulls player down fast
+    this.player.setDragY(200);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.ground);
 
@@ -430,7 +431,7 @@ class GameScene extends Phaser.Scene {
 
     // Timer to spawn obstacles or powerups
     this.spawnTimer = this.time.addEvent({
-      delay: 1500,
+      delay: 2000,
       callback: this.spawn,
       callbackScope: this,
       loop: true,
@@ -440,7 +441,7 @@ class GameScene extends Phaser.Scene {
   jump() {
     // Only jump if touching the ground (prevents infinite flying)
     if (this.player.body.touching.down) {
-      this.player.setVelocityY(-800);
+      this.player.setVelocityY(-700);
       this.jumpSound.play();
     }
   }
@@ -489,7 +490,7 @@ class GameScene extends Phaser.Scene {
 
   spawn() {
     // Randomize the time between obstacles so it's not perfectly predictable
-    this.spawnTimer.delay = Phaser.Math.Between(1500, 2500);
+    this.spawnTimer.delay = Phaser.Math.Between(2000, 2500);
     let randomSpawnPicker = Phaser.Math.Between(0, 6);
 
     // 1 in 5 chance to spawn a powerup
