@@ -451,7 +451,7 @@ class GameScene extends Phaser.Scene {
     let obstacle;
     switch (this.enemyPicker) {
       case 1:
-        obstacle = this.obstacles.create(this.enemySpawnX, 270, "professor");
+        obstacle = this.obstacles.create(this.enemySpawnX, 290, "professor");
 
         obstacle.setVelocityX(this.obstacleSpeed + 20);
         obstacle.setImmovable(true);
